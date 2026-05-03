@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RMF Agent — ATO Automation Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:#0d1117;color:#e6edf3;font-family:'IBM Plex Sans',sans-serif;font-size:13px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px;}
+select,input,textarea{background:#0d1117;border:1px solid #30363d;color:#e6edf3;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:5px;outline:none;padding:5px 9px;}
+select:focus,input:focus,textarea:focus{border-color:#388bfd;}
+.shell{display:flex;flex-direction:row;height:100vh;width:100%;overflow:hidden;}
+.sidebar{width:210px;min-width:210px;background:#161b22;border-right:1px solid #21262d;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+.main{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.brand{padding:12px 14px 10px;border-bottom:1px solid #21262d;flex-shrink:0;}
+.brand-row{display:flex;align-items:center;gap:8px;}
+.brand-icon{width:24px;height:24px;background:#388bfd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:monospace;flex-shrink:0;}
+.brand-name{font-size:12px;font-weight:600;letter-spacing:.06em;font-family:monospace;}
+.brand-sub{font-size:10px;color:#484f58;margin-top:1px;font-family:monospace;}
+.sec-lbl{padding:10px 14px 3px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#484f58;font-family:monospace;flex-shrink:0;}
+.nav{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;cursor:pointer;color:#8b949e;border-left:2px solid transparent;transition:all .12s;user-select:none;}
+.nav:hover{color:#e6edf3;background:#1c2330;}
+.nav.on{color:#79c0ff;border-left-color:#388bfd;background:#1f3a5f;}
+.view-hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.view-title{font-size:14px;font-weight:600;font-family:monospace;letter-spacing:.02em;}
+.view-sub{font-size:11px;color:#8b949e;margin-top:2px;}
+.panel{border:1px solid #30363d;border-radius:6px;background:#161b22;overflow:hidden;flex-shrink:0;}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #21262d;background:#1c2330;}
+.pt{font-size:11px;font-weight:500;color:#8b949e;font-family:monospace;letter-spacing:.04em;}
+.pb{padding:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.span2{grid-column:1/-1;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#484f58;font-family:monospace;font-weight:500;}
+input[type=text]{width:100%;height:30px;}
+select{width:100%;height:30px;cursor:pointer;}
+textarea{width:100%;resize:vertical;min-height:60px;line-height:1.6;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.tag{font-family:monospace;font-size:11px;padding:2px 8px;border-radius:3px;cursor:pointer;border:1px solid #30363d;color:#8b949e;transition:all .1s;user-select:none;display:inline-block;}
+.tag.on{border-color:#388bfd;color:#79c0ff;background:#1f3a5f;}
+.ag{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.acard{padding:8px 10px;border:1px solid #21262d;border-radius:5px;cursor:pointer;transition:all .1s;user-select:none;}
+.acard:hover{border-color:#30363d;background:#1c2330;}
+.acard.on{border-color:#388bfd;background:#1f3a5f;}
+.aname{font-size:11px;font-weight:500;color:#e6edf3;font-family:monospace;}
+.adesc{font-size:10px;color:#8b949e;margin-top:2px;}
+.tabs{display:flex;border-bottom:1px solid #21262d;flex-wrap:wrap;}
+.tab{padding:7px 11px;font-family:monospace;font-size:11px;cursor:pointer;color:#8b949e;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;user-select:none;}
+.tab.on{color:#79c0ff;border-bottom-color:#388bfd;}
+.btn-run{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:#388bfd;color:#fff;border:none;border-radius:6px;font-family:monospace;font-size:13px;font-weight:500;cursor:pointer;width:100%;transition:opacity .15s;letter-spacing:.02em;flex-shrink:0;}
+.btn-run:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sm{font-family:monospace;font-size:10px;padding:4px 10px;background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:4px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.btn-sm:hover{color:#e6edf3;border-color:#8b949e;}
+.output-wrap{max-height:420px;overflow-y:auto;}
+.output{font-family:monospace;font-size:12px;line-height:1.85;color:#e6edf3;white-space:pre-wrap;word-break:break-word;padding:12px;}
+.empty{font-size:12px;color:#484f58;text-align:center;padding:2rem 1rem;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;}
+.badge{display:inline-flex;align-items:center;font-family:monospace;font-size:10px;padding:2px 8px;border-radius:3px;letter-spacing:.05em;white-space:nowrap;}
+.b-blue{background:#1f3a5f;color:#79c0ff;}
+.b-green{background:#1b3724;color:#3fb950;}
+.b-amber{background:#341a00;color:#d29922;}
+.b-red{background:#3d1a1a;color:#f85149;}
+.hist-preview{padding:8px 12px;font-family:monospace;font-size:11px;color:#8b949e;line-height:1.7;max-height:80px;overflow:hidden;}
+.toast{position:fixed;bottom:16px;right:16px;background:#1b3724;border:1px solid #3fb950;color:#3fb950;font-family:monospace;font-size:12px;padding:8px 14px;border-radius:5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999;}
+.toast.show{opacity:1;}
+.tip{margin-top:8px;padding:6px 8px;background:#0d1117;border:1px solid #21262d;border-radius:4px;font-size:11px;color:#484f58;font-family:monospace;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-row">
+        <div class="brand-icon">R</div>
+        <div>
+          <div class="brand-name">RMF AGENT</div>
+          <div class="brand-sub">ATO Automation Suite</div>
+        </div>
+      </div>
+    </div>
+    <div class="sec-lbl">Workstreams</div>
+    <div class="nav on" id="n-controls" onclick="nav('controls')"><span style="width:16px;text-align:center">⊞</span> Control Implementation</div>
+    <div class="nav" id="n-artifacts" onclick="nav('artifacts')"><span style="width:16px;text-align:center">◈</span> Artifact Mapping</div>
+    <div class="nav" id="n-deliverables" onclick="nav('deliverables')"><span style="width:16px;text-align:center">◧</span> RMF Deliverables</div>
+    <div class="sec-lbl">Session</div>
+    <div class="nav" id="n-history" onclick="nav('history')"><span style="width:16px;text-align:center">◷</span> Output History</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══ CONTROLS ══ -->
+    <div id="v-controls">
+      <div class="view-hdr" style="margin-bottom:8px">
+        <div><div class="view-title">Control Implementation</div><div class="view-sub">Generate tailored SSP narratives · NIST SP 800-53 Rev 5</div></div>
+        <span class="badge b-blue" id="ctrl-badge">READY</span>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">// system_context</span></div>
+        <div class="pb">
+          <div class="g2">
+            <div class="field"><span class="lbl">System name</span><input type="text" id="sys-name" placeholder="e.g. Agency HR Portal"/></div>
+            <div class="field"><span class="lbl">FIPS impact level</span><select id="impact"><option>Low</option><option selected>Moderate</option><option>High</option></select></div>
+            <div class="field"><span class="lbl">Cloud / hosting</span><select id="cloud"><option>On-premise data center</option><option>AWS GovCloud (US)</option><option>Azure Government</option><option>Google Cloud (FedRAMP)</option><option>Hybrid (on-prem + cloud)</option></select></div>
+            <div class="field"><span class="lbl">Authorization type</span><select id="auth"><option>ATO</option><option>IATT</option><option>FedRAMP In-Process</option><option>Common Control Provider</option></select></div>
+            <div class="field span2"><span class="lbl">System description</span><textarea id="sys-desc" placeholder="Describe the system, primary users, key data types (PII, CUI, etc.), major components..."></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">// select_controls</span></div>
+        <div class="pb">
+          <div class="field"><span class="lbl">Control family</span>
+            <select id="ctrl-fam" onchange="onFamilyChange(this.value)">
+              <option value="AC">AC — Access Control</option><option value="AT">AT — Awareness & Training</option>
+              <option value="AU">AU — Audit & Accountability</option><option value="CA">CA — Assessment, Authorization & Monitoring</option>
+              <option value="CM">CM — Configuration Management</option><option value="CP">CP — Contingency Planning</option>
+              <option value="IA">IA — Identification & Authentication</option><option value="IR">IR — Incident Response</option>
+              <option value="MA">MA — Maintenance</option><option value="MP">MP — Media Protection</option>
+              <option value="PE">PE — Physical & Environmental Protection</option><option value="PL">PL — Planning</option>
+              <option value="PM">PM — Program Management</option><option value="PS">PS — Personnel Security</option>
+              <option value="RA">RA — Risk Assessment</option><option value="SA">SA — System & Services Acquisition</option>
+              <option value="SC">SC — System & Communications Protection</option><option value="SI">SI — System & Information Integrity</option>
+              <option value="SR">SR — Supply Chain Risk Management</option>
+            </select>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
+            <span class="lbl" id="ctrl-count-lbl">Controls (16 selected)</span>
+            <div style="display:flex;gap:5px;"><button class="btn-sm" onclick="selectAllCtrls()">All</button><button class="btn-sm" onclick="clearAllCtrls()">None</button></div>
+          </div>
+          <div class="tags" id="ctrl-tags"></div>
+          <div class="tip">⚠ Tip: Select 3–5 controls per run for best output quality</div>
+        </div>
+      </div>
+      <button class="btn-run" id="ctrl-btn" onclick="runControls()"><span id="ctrl-btn-lbl">Generate implementation statements ↗</span></button>
+      <div class="panel">
+        <div class="ph"><span class="pt">// output</span>
+          <div style="display:flex;gap:6px;"><button class="btn-sm" onclick="copyOut('ctrl')">📋 Copy</button><button class="btn-sm" onclick="saveOut('ctrl','controls')">💾 Save .txt</button></div>
+        </div>
+        <div class="output-wrap"><div class="output" id="ctrl-out"><div class="empty">Configure system context and select controls, then generate.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ARTIFACTS ══ -->
+    <div id="v-artifacts" style="display:none">
+      <div class="view-hdr" style="margin-bottom:8px">
+        <div><div class="view-title">Artifact Mapping</div><div class="view-sub">Map evidence to control assessment objectives</div></div>
+        <span class="badge b-blue" id="art-badge">READY</span>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">// select_artifacts</span></div>
+        <div class="pb">
+          <div class="ag" id="art-grid"></div>
+          <div class="field" style="margin-top:10px"><span class="lbl">Custom artifact (optional)</span><input type="text" id="custom-art" placeholder="Add an artifact not listed above..."/></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">// target_control</span></div>
+        <div class="pb">
+          <div class="g2" style="margin-bottom:10px;">
+            <div class="field"><span class="lbl">Control ID</span><input type="text" id="art-ctrl-id" placeholder="e.g. AC-2"/></div>
+            <div class="field"><span class="lbl">Control name</span><input type="text" id="art-ctrl-name" placeholder="e.g. Account Management"/></div>
+          </div>
+          <div class="field" style="margin-bottom:8px;">
+            <span class="lbl">Or pick from a control family</span>
+            <select id="art-fam" onchange="onArtFamilyChange(this.value)">
+              <option value="">— Select a family to browse controls —</option>
+              <option value="AC">AC — Access Control</option><option value="AT">AT — Awareness & Training</option>
+              <option value="AU">AU — Audit & Accountability</option><option value="CA">CA — Assessment, Authorization & Monitoring</option>
+              <option value="CM">CM — Configuration Management</option><option value="CP">CP — Contingency Planning</option>
+              <option value="IA">IA — Identification & Authentication</option><option value="IR">IR — Incident Response</option>
+              <option value="MA">MA — Maintenance</option><option value="MP">MP — Media Protection</option>
+              <option value="PE">PE — Physical & Environmental Protection</option><option value="PL">PL — Planning</option>
+              <option value="PM">PM — Program Management</option><option value="PS">PS — Personnel Security</option>
+              <option value="RA">RA — Risk Assessment</option><option value="SA">SA — System & Services Acquisition</option>
+              <option value="SC">SC — System & Communications Protection</option><option value="SI">SI — System & Information Integrity</option>
+              <option value="SR">SR — Supply Chain Risk Management</option>
+            </select>
+          </div>
+          <div class="tags" id="art-ctrl-tags" style="margin-bottom:10px;"></div>
+          <div class="field">
+            <span class="lbl">Assessment focus</span>
+            <select id="art-focus"><option>Full control satisfaction</option><option>Examine objectives only</option><option>Interview objectives only</option><option>Test objectives only</option><option>Gap analysis</option></select>
+          </div>
+        </div>
+      </div>
+      <button class="btn-run" id="art-btn" onclick="runArtifacts()"><span id="art-btn-lbl">Map artifacts to control ↗</span></button>
+      <div class="panel">
+        <div class="ph"><span class="pt">// output</span>
+          <div style="display:flex;gap:6px;"><button class="btn-sm" onclick="copyOut('art')">📋 Copy</button><button class="btn-sm" onclick="saveOut('art','artifact-mapping')">💾 Save .txt</button></div>
+        </div>
+        <div class="output-wrap"><div class="output" id="art-out"><div class="empty">Select artifacts and a target control, then map.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ DELIVERABLES ══ -->
+    <div id="v-deliverables" style="display:none">
+      <div class="view-hdr" style="margin-bottom:8px">
+        <div><div class="view-title">RMF Deliverables</div><div class="view-sub">Draft SSPs, RARs, POA&Ms, SARs, ConMon plans</div></div>
+        <span class="badge b-blue" id="doc-badge">READY</span>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">// document_type</span></div>
+        <div class="tabs">
+          <div class="tab on" onclick="selectDoc('ssp',this)">SSP</div>
+          <div class="tab" onclick="selectDoc('rar',this)">RAR</div>
+          <div class="tab" onclick="selectDoc('poam',this)">POA&M</div>
+          <div class="tab" onclick="selectDoc('sar',this)">SAR</div>
+          <div class="tab" onclick="selectDoc('conmon',this)">ConMon</div>
+          <div class="tab" onclick="selectDoc('memo',this)">Risk Memo</div>
+        </div>
+        <div class="pb">
+          <div class="g2">
+            <div class="field"><span class="lbl">Section to draft</span><select id="doc-section"></select></div>
+            <div class="field"><span class="lbl">Target audience</span>
+              <select id="doc-audience"><option>Authorizing Official (AO)</option><option>Security Control Assessor (SCA)</option><option>ISSO / System Owner</option><option>CIO / CISO</option><option>Inspector General</option></select>
+            </div>
+          </div>
+          <div class="field" style="margin-top:10px"><span class="lbl">Additional context / findings</span>
+            <textarea id="doc-notes" placeholder="Paste specific findings, risk ratings, vulnerability details, or context to incorporate..."></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="btn-run" id="doc-btn" onclick="runDeliverable()"><span id="doc-btn-lbl">Draft section ↗</span></button>
+      <div class="panel">
+        <div class="ph"><span class="pt">// output</span>
+          <div style="display:flex;gap:6px;"><button class="btn-sm" onclick="copyOut('doc')">📋 Copy</button><button class="btn-sm" onclick="saveOut('doc','deliverable')">💾 Save .txt</button></div>
+        </div>
+        <div class="output-wrap"><div class="output" id="doc-out"><div class="empty">Select a document type and section, then draft.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORY ══ -->
+    <div id="v-history" style="display:none">
+      <div class="view-hdr" style="margin-bottom:8px">
+        <div><div class="view-title">Output History</div><div class="view-sub">All generated content this session</div></div>
+        <button class="btn-sm" onclick="clearHistory()">Clear session</button>
+      </div>
+      <div id="hist-list"><div class="empty">No outputs yet this session.</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CONTROLS={AC:['AC-1','AC-2','AC-3','AC-4','AC-5','AC-6','AC-7','AC-8','AC-10','AC-11','AC-12','AC-14','AC-17','AC-18','AC-19','AC-20'],AT:['AT-1','AT-2','AT-3','AT-4'],AU:['AU-1','AU-2','AU-3','AU-4','AU-5','AU-6','AU-7','AU-8','AU-9','AU-10','AU-11','AU-12'],CA:['CA-1','CA-2','CA-3','CA-5','CA-6','CA-7','CA-8','CA-9'],CM:['CM-1','CM-2','CM-3','CM-4','CM-5','CM-6','CM-7','CM-8','CM-9','CM-10','CM-11'],CP:['CP-1','CP-2','CP-3','CP-4','CP-6','CP-7','CP-8','CP-9','CP-10'],IA:['IA-1','IA-2','IA-3','IA-4','IA-5','IA-6','IA-7','IA-8','IA-11','IA-12'],IR:['IR-1','IR-2','IR-3','IR-4','IR-5','IR-6','IR-7','IR-8'],MA:['MA-1','MA-2','MA-3','MA-4','MA-5','MA-6'],MP:['MP-1','MP-2','MP-3','MP-4','MP-5','MP-6','MP-7'],PE:['PE-1','PE-2','PE-3','PE-4','PE-5','PE-6','PE-8','PE-9','PE-10','PE-11','PE-12','PE-13','PE-14','PE-15'],PL:['PL-1','PL-2','PL-4','PL-8','PL-9','PL-10','PL-11'],PM:['PM-1','PM-2','PM-3','PM-4','PM-5','PM-6','PM-7','PM-8','PM-9'],PS:['PS-1','PS-2','PS-3','PS-4','PS-5','PS-6','PS-7','PS-8','PS-9'],RA:['RA-1','RA-2','RA-3','RA-5','RA-7','RA-9'],SA:['SA-1','SA-2','SA-3','SA-4','SA-5','SA-8','SA-9','SA-10','SA-11','SA-15'],SC:['SC-1','SC-2','SC-3','SC-4','SC-5','SC-7','SC-8','SC-10','SC-12','SC-13','SC-15','SC-17','SC-18','SC-20','SC-21','SC-22','SC-28','SC-39'],SI:['SI-1','SI-2','SI-3','SI-4','SI-5','SI-6','SI-7','SI-8','SI-10','SI-12','SI-16'],SR:['SR-1','SR-2','SR-3','SR-5','SR-6','SR-8','SR-10','SR-11','SR-12']};
+const CTRL_NAMES={'AC-1':'Policy and Procedures','AC-2':'Account Management','AC-3':'Access Enforcement','AC-4':'Information Flow Enforcement','AC-5':'Separation of Duties','AC-6':'Least Privilege','AC-7':'Unsuccessful Logon Attempts','AC-8':'System Use Notification','AC-10':'Concurrent Session Control','AC-11':'Device Lock','AC-12':'Session Termination','AC-14':'Permitted Actions Without Identification','AC-17':'Remote Access','AC-18':'Wireless Access','AC-19':'Access Control for Mobile Devices','AC-20':'Use of External Systems','AU-1':'Policy and Procedures','AU-2':'Event Logging','AU-3':'Content of Audit Records','AU-4':'Audit Log Storage Capacity','AU-5':'Response to Audit Logging Process Failures','AU-6':'Audit Record Review Analysis and Reporting','AU-7':'Audit Record Reduction and Report Generation','AU-8':'Time Stamps','AU-9':'Protection of Audit Information','AU-10':'Non-repudiation','AU-11':'Audit Record Retention','AU-12':'Audit Record Generation','IA-1':'Policy and Procedures','IA-2':'Identification and Authentication','IA-3':'Device Identification and Authentication','IA-4':'Identifier Management','IA-5':'Authenticator Management','IA-6':'Authentication Feedback','IA-7':'Cryptographic Module Authentication','IA-8':'Identification and Authentication Non-Org Users','IA-11':'Re-authentication','IA-12':'Identity Proofing','CM-1':'Policy and Procedures','CM-2':'Baseline Configuration','CM-3':'Configuration Change Control','CM-4':'Impact Analyses','CM-5':'Access Restrictions for Change','CM-6':'Configuration Settings','CM-7':'Least Functionality','CM-8':'System Component Inventory','CM-9':'Configuration Management Plan','CM-10':'Software Usage Restrictions','CM-11':'User-Installed Software','IR-1':'Policy and Procedures','IR-2':'Incident Response Training','IR-3':'Incident Response Testing','IR-4':'Incident Handling','IR-5':'Incident Monitoring','IR-6':'Incident Reporting','IR-7':'Incident Response Assistance','IR-8':'Incident Response Plan','SC-1':'Policy and Procedures','SC-2':'Separation of System and User Functionality','SC-3':'Security Function Isolation','SC-4':'Information in Shared System Resources','SC-5':'Denial-of-Service Protection','SC-7':'Boundary Protection','SC-8':'Transmission Confidentiality and Integrity','SC-10':'Network Disconnect','SC-12':'Cryptographic Key Establishment and Management','SC-13':'Cryptographic Protection','SC-15':'Collaborative Computing Devices and Applications','SC-17':'Public Key Infrastructure Certificates','SC-18':'Mobile Code','SC-20':'Secure Name/Address Resolution Service','SC-21':'Secure Name/Address Resolution Service Recursive','SC-22':'Architecture and Provisioning for Name/Address Resolution','SC-28':'Protection of Information at Rest','SC-39':'Process Isolation','SI-1':'Policy and Procedures','SI-2':'Flaw Remediation','SI-3':'Malicious Code Protection','SI-4':'System Monitoring','SI-5':'Security Alerts Advisories and Directives','SI-6':'Security and Privacy Function Verification','SI-7':'Software Firmware and Information Integrity','SI-8':'Spam Protection','SI-10':'Information Input Validation','SI-12':'Information Management and Retention','SI-16':'Memory Protection','RA-1':'Policy and Procedures','RA-2':'Security Categorization','RA-3':'Risk Assessment','RA-5':'Vulnerability Monitoring and Scanning','RA-7':'Risk Response','RA-9':'Criticality Analysis'};
+const ARTIFACTS=[{id:'ssp',name:'System Security Plan',desc:'Existing SSP sections'},{id:'pol',name:'Security Policies',desc:'Org-level policy docs'},{id:'sop',name:'SOPs / Procedures',desc:'Standard operating procedures'},{id:'scan',name:'Vulnerability Scan Results',desc:'Nessus / Tenable outputs'},{id:'pen',name:'Penetration Test Report',desc:'Most recent pentest findings'},{id:'audit',name:'Audit Logs / SIEM',desc:'Log aggregator samples'},{id:'train',name:'Training Records',desc:'Awareness training certs'},{id:'inv',name:'System Inventory',desc:'Hardware & software inventory'},{id:'net',name:'Network Diagrams',desc:'Boundary documentation'},{id:'ir',name:'Incident Response Plan',desc:'IR plan & procedures'},{id:'cm',name:'Change Management Records',desc:'Change logs & tickets'},{id:'mfa',name:'MFA Evidence',desc:'Auth config screenshots'},{id:'bcp',name:'BCP / COOP',desc:'Continuity of operations plan'},{id:'fwrules',name:'Firewall Ruleset',desc:'Network ACLs & firewall config'},{id:'patching',name:'Patch Records',desc:'WSUS / patch reports'},{id:'contract',name:'Contracts / MOUs',desc:'ISAs, BAAs, MOUs'}];
+const DOC_SECTIONS={ssp:['1. System Name / Title','2. System Categorization (FIPS 199)','3. Authorization Boundary','4. Information Types Processed','5. System Description & Purpose','6. Network Architecture Overview','7. System Interconnections','8. Laws, Regulations & Standards','9. Security Controls Summary','10. Common Control Providers','11. Minimum Assurance Requirements'],rar:['Executive Summary','1. Assessment Scope & Methodology','2. Threat Environment Overview','3. Vulnerability Summary','4. Risk Calculation Methodology','5. Detailed Risk Findings','6. Residual Risk Analysis','7. Risk Acceptance Rationale','8. Recommendations'],poam:['Weakness Description & Background','Detection Source & Date','Control Deficiency Analysis','Remediation Plan & Milestones','Resource & Cost Estimates','POA&M Status Update Narrative','Risk Rating Justification'],sar:['1. Executive Summary','2. Assessment Scope & Objectives','3. Assessment Methodology','4. Findings Summary','5. Detailed Security Findings','6. Security Requirements Traceability Matrix','7. Recommendations','8. Assessor Conclusion'],conmon:['ConMon Strategy Overview','Ongoing Assessment Procedures','Vulnerability Scanning Schedule','Reporting Requirements','POA&M Management Process','Annual Assessment Planning','Significant Change Procedures'],memo:['Risk Summary & Background','Description of Accepted Risk','Conditions of Acceptance','Required Mitigations','AO Acknowledgment & Signature Block']};
+const DOC_NAMES={ssp:'System Security Plan (SSP)',rar:'Risk Assessment Report (RAR)',poam:'Plan of Action & Milestones (POA&M)',sar:'Security Assessment Report (SAR)',conmon:'Continuous Monitoring Plan',memo:'Risk Acceptance Memorandum'};
+
+let selCtrls=new Set(CONTROLS['AC']);
+let selArts=new Set();
+let activeDoc='ssp';
+let history=[];
+let rawText={ctrl:'',art:'',doc:''};
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+
+function nav(v){
+  ['controls','artifacts','deliverables','history'].forEach(x=>{
+    document.getElementById('v-'+x).style.display=x===v?'':'none';
+    document.getElementById('n-'+x).classList.toggle('on',x===v);
+  });
+  if(v==='history')renderHistory();
+}
+
+function onFamilyChange(fam){selCtrls=new Set(CONTROLS[fam]||[]);renderCtrlTags(fam);}
+function renderCtrlTags(fam){
+  document.getElementById('ctrl-tags').innerHTML=(CONTROLS[fam]||[]).map(c=>`<span class="tag${selCtrls.has(c)?' on':''}" id="tag-${c}" onclick="toggleCtrl('${c}')">${c}</span>`).join('');
+  updateCtrlCount();
+}
+function toggleCtrl(c){selCtrls.has(c)?selCtrls.delete(c):selCtrls.add(c);const el=document.getElementById('tag-'+c);if(el)el.classList.toggle('on',selCtrls.has(c));updateCtrlCount();}
+function selectAllCtrls(){const fam=document.getElementById('ctrl-fam').value;(CONTROLS[fam]||[]).forEach(c=>{selCtrls.add(c);const el=document.getElementById('tag-'+c);if(el)el.classList.add('on');});updateCtrlCount();}
+function clearAllCtrls(){selCtrls.clear();document.querySelectorAll('#ctrl-tags .tag').forEach(el=>el.classList.remove('on'));updateCtrlCount();}
+function updateCtrlCount(){document.getElementById('ctrl-count-lbl').textContent=`Controls (${selCtrls.size} selected)`;}
+
+function sysCtx(){return{name:document.getElementById('sys-name').value.trim()||'the federal information system',level:document.getElementById('impact').value,cloud:document.getElementById('cloud').value,auth:document.getElementById('auth').value,desc:document.getElementById('sys-desc').value.trim()};}
+
+async function runControls(){
+  if(!selCtrls.size){alert('Select at least one control.');return;}
+  const ctx=sysCtx();
+  const controls=[...selCtrls].sort().join(', ');
+  const prompt=`You are a senior federal ISSO writing implementation statements for a System Security Plan (SSP) under NIST SP 800-53 Rev 5.\n\nSYSTEM CONTEXT:\n- System Name: ${ctx.name}\n- FIPS Impact Level: ${ctx.level}\n- Hosting / Environment: ${ctx.cloud}\n- Authorization Type: ${ctx.auth}\n${ctx.desc?'- System Description: '+ctx.desc:''}\n\nTASK: Write complete, detailed implementation statements for ALL of these controls: ${controls}\n\nCRITICAL: Cover every single control listed. Do not stop early or truncate.\n\nFORMAT FOR EACH CONTROL:\n- Control ID + full official name as a header (e.g., "AC-2  ACCOUNT MANAGEMENT")\n- 3-5 sentences of specific implementation narrative\n- Reference the system name "${ctx.name}" and environment "${ctx.cloud}" specifically\n- No generic boilerplate\n- Past/present tense: "The system implements...", "The organization has established..."\n- Blank line between each control\n\nWrite as a seasoned ISSO.`;
+  await runAgent('ctrl',`Controls: ${controls}`,prompt);
+}
+
+function renderArtGrid(){document.getElementById('art-grid').innerHTML=ARTIFACTS.map(a=>`<div class="acard" id="ac-${a.id}" onclick="toggleArt('${a.id}')"><div class="aname">${a.name}</div><div class="adesc">${a.desc}</div></div>`).join('');}
+function toggleArt(id){selArts.has(id)?selArts.delete(id):selArts.add(id);document.getElementById('ac-'+id).classList.toggle('on',selArts.has(id));}
+function onArtFamilyChange(fam){
+  const container=document.getElementById('art-ctrl-tags');
+  if(!fam){container.innerHTML='';return;}
+  container.innerHTML=(CONTROLS[fam]||[]).map(c=>`<span class="tag" id="atag-${c}" onclick="selectArtCtrl('${c}','${fam}')">${c}</span>`).join('');
+}
+function selectArtCtrl(c,fam){
+  (CONTROLS[fam]||[]).forEach(x=>{const el=document.getElementById('atag-'+x);if(el)el.classList.remove('on');});
+  const el=document.getElementById('atag-'+c);if(el)el.classList.add('on');
+  document.getElementById('art-ctrl-id').value=c;
+  document.getElementById('art-ctrl-name').value=CTRL_NAMES[c]||'';
+}
+
+async function runArtifacts(){
+  if(!selArts.size&&!document.getElementById('custom-art').value.trim()){alert('Select at least one artifact.');return;}
+  const artList=[...selArts].map(id=>ARTIFACTS.find(a=>a.id===id)?.name).filter(Boolean);
+  const custom=document.getElementById('custom-art').value.trim();if(custom)artList.push(custom);
+  const cid=document.getElementById('art-ctrl-id').value.trim()||'the control';
+  const cname=document.getElementById('art-ctrl-name').value.trim();
+  const focus=document.getElementById('art-focus').value;
+  const prompt=`You are a federal Security Control Assessor (SCA) preparing a formal artifact evidence mapping under NIST SP 800-53A Rev 5.\n\nTARGET CONTROL: ${cid}${cname?' — '+cname:''}\nASSESSMENT FOCUS: ${focus}\nAVAILABLE ARTIFACTS: ${artList.join(', ')}\n\nFor EACH artifact, provide a complete structured analysis:\n\n[ARTIFACT NAME]\n• Relevance to ${cid}: How specifically this artifact supports control satisfaction\n• Evidence Elements: Exact sections, fields, timestamps, screenshots an assessor would examine\n• Objectives Covered: Which examine / interview / test objectives this addresses\n• Gaps & Limitations: What aspects of the control this does NOT address\n\nCover every artifact. Then conclude with:\n\nOVERALL SATISFACTION ASSESSMENT\nRating: [Satisfied / Partially Satisfied / Not Satisfied]\nRationale: [Explain the rating]\nRemaining Gaps: [List evidence still needed]`;
+  await runAgent('art',`Artifact map: ${cid}`,prompt);
+}
+
+function selectDoc(d,el){activeDoc=d;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');document.getElementById('doc-section').innerHTML=(DOC_SECTIONS[d]||[]).map(s=>`<option>${s}</option>`).join('');}
+
+async function runDeliverable(){
+  const ctx=sysCtx();
+  const section=document.getElementById('doc-section').value;
+  const audience=document.getElementById('doc-audience').value;
+  const notes=document.getElementById('doc-notes').value.trim();
+  const prompt=`You are a senior federal ISSO drafting official RMF documentation under NIST SP 800-37 Rev 2 and NIST SP 800-53 Rev 5.\n\nDOCUMENT: ${DOC_NAMES[activeDoc]}\nSECTION: ${section}\nSYSTEM NAME: ${ctx.name}\nFIPS Impact Level: ${ctx.level}\nHosting Environment: ${ctx.cloud}\nAuthorization Type: ${ctx.auth}\nTarget Audience: ${audience}\n${ctx.desc?'System Description: '+ctx.desc:''}\n${notes?'\nAdditional Context / Findings:\n'+notes:''}\n\nDraft a thorough, complete, professional version of this section:\n- Formal U.S. federal government documentation style\n- At least 400 words — be substantive\n- Reference applicable NIST publications where relevant\n- Use [BRACKETED PLACEHOLDERS] only for genuinely unknown info\n- No filler language — every sentence must add value\n- Include all standard required elements\n- Use numbered subsections and structured lists where appropriate\n\nBegin immediately without preamble.`;
+  await runAgent('doc',`${DOC_NAMES[activeDoc]}: ${section}`,prompt);
+}
+
+async function runAgent(prefix,histLabel,prompt){
+  const btn=document.getElementById(prefix+'-btn');
+  const lbl=document.getElementById(prefix+'-btn-lbl');
+  const badge=document.getElementById(prefix+'-badge');
+  const out=document.getElementById(prefix+'-out');
+  const labels={ctrl:'Generate implementation statements ↗',art:'Map artifacts to control ↗',doc:'Draft section ↗'};
+  btn.disabled=true;lbl.innerHTML='<span class="spinner"></span> Agent running...';
+  badge.className='badge b-amber';badge.textContent='RUNNING';
+  out.innerHTML='<div class="empty" style="color:#8b949e">Generating — please wait...</div>';
+  rawText[prefix]='';
+  try{
+    const res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+res.status);}
+    const data=await res.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    rawText[prefix]=text;out.textContent=text;
+    badge.className='badge b-green';badge.textContent='COMPLETE';
+    history.unshift({label:histLabel,content:text,ts:new Date().toLocaleTimeString()});
+  }catch(e){
+    out.textContent='Error: '+e.message;badge.className='badge b-red';badge.textContent='ERROR';
+  }finally{
+    btn.disabled=false;lbl.textContent=labels[prefix]||'Run ↗';
+  }
+}
+
+function copyOut(prefix){
+  const text=rawText[prefix]||'';
+  if(!text.trim()){toast('⚠ Nothing to copy — run the agent first');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast('✓ Copied to clipboard')).catch(()=>fallbackCopy(text));}
+  else{fallbackCopy(text);}
+}
+function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');toast('✓ Copied');}catch(e){toast('⚠ Copy failed');}document.body.removeChild(ta);}
+function saveOut(prefix,name){
+  const text=rawText[prefix]||'';
+  if(!text.trim()){toast('⚠ Nothing to save — run the agent first');return;}
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=name+'-'+Date.now()+'.txt';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);toast('✓ File saved');
+}
+
+function renderHistory(){
+  const el=document.getElementById('hist-list');
+  if(!history.length){el.innerHTML='<div class="empty">No outputs yet this session.</div>';return;}
+  el.innerHTML=history.map((h,i)=>`<div class="panel" style="margin-bottom:8px"><div class="ph"><span class="pt">${h.label.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span><div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;color:#484f58;font-family:monospace">${h.ts}</span><button class="btn-sm" onclick="copyDirect(${i})">📋 Copy</button><button class="btn-sm" onclick="saveDirect(${i})">💾 Save</button></div></div><div class="hist-preview">${h.content.slice(0,500).replace(/&/g,'&amp;').replace(/</g,'&lt;')}${h.content.length>500?'...':''}</div></div>`).join('');
+}
+function copyDirect(i){const t=history[i]?.content||'';if(!t){toast('⚠ No content');return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('✓ Copied')).catch(()=>fallbackCopy(t));}else{fallbackCopy(t);}}
+function saveDirect(i){const h=history[i];if(!h?.content){toast('⚠ No content');return;}const blob=new Blob([h.content],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=h.label.replace(/[^a-z0-9\s-]/gi,'').trim().replace(/\s+/g,'-')+'.txt';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);toast('✓ Saved');}
+function clearHistory(){history=[];renderHistory();}
+
+renderCtrlTags('AC');
+renderArtGrid();
+selectDoc('ssp',document.querySelector('.tab'));
+</script>
+</body>
+</html>
